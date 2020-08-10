@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<title>laughing-register</title>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-form ref="registerform" :model="registerform">
+        <el-container>
+            <!--            <el-header>LAUGHING-SSO</el-header>-->
+            <el-main style="position: fixed ; width:100%;top:8%; ">
+                <el-row>
+                    <el-col :span="8" :offset="9">
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8" :offset="9">
+                        <div class="" style="width: 75%">
+                            <el-form-item label="用户名">
+                                <el-input v-model="registerform.username" name="username"></el-input>
+                            </el-form-item>
+                            <el-form-item label="密码（6到18位）">
+                                <el-input v-model="registerform.password" name="password" type="password"></el-input>
+                            </el-form-item>
+                            <el-form-item label="手机号">
+                                <el-input v-model="registerform.phone" name="phone"></el-input>
+                                <el-button type="text" class="findPassword" @click.native="sendVerify">{{phoneTitle}}</el-button>
+                            </el-form-item>
+                            <el-form-item label="验证码">
+                                <el-input v-model="registerform.code" onkeyup="this.value=this.value.replace(/[^\d.]/g,'');" maxlength="4" name="code"></el-input>
+                            </el-form-item>
+                        </div>
+                    </el-col>
+                </el-row>
+                </br>
+                <el-row gutter="5">
+                    <el-col :span="8" :offset="8">
+                        <div style=" text-align: center;">
+                            <!--v-on:click="register"  native-type="submit"-->
+                            <el-button type="success" round v-on:click="registers" style="width: 100px;bottom: 20%">注册</el-button>
+                        </div>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+    </el-form>
+    <el-dialog
+            title="LAUGHING-SSO"
+            :visible.sync="dialogRegister"
+            width="30%">
+        <span>{{registermsg}}</span>
+        <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="registerback">确 定</el-button>
+  </span>
+    </el-dialog>
+
+
+</div>
+<div class="foot">京ICP备20013876<br>@laughing 2020 - 2020</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data() {
+            // 00 部门管理-培训,00 部门管理-a会议,00 其他,10 项目管理,20 咨询售前,30 需求分析,40 系统设计,50 编码,60 测试,70 基础架构实施,80 运维一线支持,80 运维-程序优化,80 运维-数据,80 运维-基础架构,{.type}
+            return {
+                verifyCodeUrl: '/verifyCode?time=' + new Date(),
+                dialogRegister: false,
+                registermsg: '',
+                phoneTitle: '发送验证码',
+                registerform: {
+                    password: '',
+                    username: '',
+                    phone: '',
+                    code: ''
+                }
+            };
+        },
+        methods: {
+            // 发送验证码
+            sendVerify() {
+                if (this.phoneTitle == '发送验证码') {
+
+                    const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
+                    if (reg.test(this.registerform.phone)) {
+                        let lastTime = 59;
+                        let timer = setInterval(() => {
+                            if (lastTime > 0) {
+                                this.phoneTitle = lastTime + 's';
+                                lastTime--;
+                            } else {
+                                window.clearInterval(timer);
+                                this.phoneTitle = '发送验证码'
+                            }
+                        }, 1000);
+
+                        $.ajax({
+                            url: 'http://127.0.0.1:7070/send',
+                            type: 'POST',
+                            data: {
+                                phone: this.registerform.phone
+                            },
+                            success: function (res) {
+                                this.$message({
+                                    message: '验证码已发送',
+                                    type: 'warning'
+                                });
+                            },
+                            error: function (res) {
+                                console.log(res)
+                            }
+                        });
+                    } else {
+                        this.$message({
+                            message: '手机号码不正确',
+                            type: 'warning'
+                        });
+                    }
+                } else {
+                    return;
+                }
+
+            },
+            // 注册
+            registers() {
+                $.ajax({
+                    url: 'http://127.0.0.1:7070/register/user',
+                    type: 'POST',
+                    data: {
+                        username: this.registerform.username,
+                        password: this.registerform.password,
+                        phone: this.registerform.phone,
+                        code: this.registerform.code
+                    },
+                    success: function (res) {
+                        console.log(res);
+
+                        vm.dialogRegister = true;
+                        vm.registermsg = res;
+                        // 成功处理逻辑
+                    },
+                    error: function (res) {
+                    }
+                });
+
+            },
+            registerback() {
+                if (this.registermsg == "注册成功") {
+                    this.dialogRegister = false;
+                    sessionStorage.clear();
+                    window.location.href = "http://127.0.0.1:7070/"
+                    sessionStorage.clear();
+                }
+                this.dialogRegister = false;
+            }
+        }
+    })
+</script>
+<style>
+    body {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://api.dujin.org/bing/1920.php) 0px 0px no-repeat;
+    }
+
+    header {
+        color: #ffffff;
+        font-size: 30px;
+        text-align: center;
+        line-height: 200px;
+    }
+
+    .el-form-item__label {
+        color: #ffffff;
+        font-size: 18px;
+    }
+
+
+    .app-block {
+        width: 28%;
+        margin: 0 auto;
+        text-align: center;
+        padding: 3em 5em;
+        height: 80%;
+    }
+
+    .foot {
+        color: white;
+        font-size: 14px;
+        position: fixed;
+        bottom: 8%;
+        left: 45%;
+    }
+
+    .findPassword {
+        position: absolute;
+        top: 40px;
+        right: 10px;
+        bottom: 0px;
+    }
+</style>
+</html>

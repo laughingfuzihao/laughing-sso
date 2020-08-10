@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: laughing-sso
+  mvc:
+    view:
+      prefix: /
+      suffix: .html
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/sso?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+    driver-class-name: com.mysql.jdbc.Driver
+
+#  security:
+#    user:
+#      name: laughing
+#      password: 123456
+
+server:
+  port: 7070
+
+
+# 开启mybatis-plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
