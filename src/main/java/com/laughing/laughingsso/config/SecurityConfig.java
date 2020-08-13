@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -21,6 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * @Description:
  * @date 20202020/8/6 17:01
  */
+// prePostEnabled 方法执行之前拦截
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
@@ -100,7 +103,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return authenticationProvider;
     }
 
-
+    /**
+     * 安全拦截机制
+     * @param http
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //
